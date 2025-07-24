@@ -7,7 +7,7 @@ let var2 = window.prompt('Forneça o segundo número: ');
 const confirm_my = window.confirm('Vamos executar a operação matemática. Tudo bem?');
 
 if (confirm_my) {
-    const result = parseInt(var1) + parseInt(var2);
+    const result = parseInt(var1) + parseInt(var2); // Aqui, o mais correto seria utilizar o Number() para converter as strings.
     console.log(result);
     alert(`O resultado foi ${result}`);
     window.location.reload()

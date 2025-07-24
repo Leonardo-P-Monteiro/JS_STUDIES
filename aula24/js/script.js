@@ -1,0 +1,15 @@
+let mensagem = '    Hellow, World!';
+console.log(mensagem);
+console.log('trim '+mensagem.trim())
+console.log('toUpperCase '+mensagem.toUpperCase())
+console.log('toLowerCase '+mensagem.toLowerCase())
+console.log('includes '+ mensagem.includes('e'))
+console.log('includes '+ mensagem.includes('e', 14))
+console.log('indexof '+ mensagem.indexOf('w', 1))
+console.log('lastindexof '+ mensagem.lastIndexOf('l'))
+console.log('substring '+ mensagem.substring(5, 9))
+console.log('replace '+ mensagem.replace('l','9'))
+console.log('replace '+ mensagem.replace(/Hellow/g, 'Hi'))
+console.log(mensagem.split(' '))
+console.log(mensagem.match('low'))
+console.log(mensagem.slice(4, 9))
