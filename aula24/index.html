@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Exercício Aula de Strings</title>
 </head>
 <body>
-    
+
+
+    <script>
+        const myname = prompt('Digite seu nome completo: ');
+        document.body.innerHTML = `Seu nome é ${myname}. <br/>`;
+        document.body.innerHTML += `Seu nome tem ${myname.length} letras. <br/>`;
+        document.body.innerHTML += `A segunda letra do seu nome é: ${myname.charAt(1)} <br/>`;
+        document.body.innerHTML += `Qual o primeiro índice da letra "a" no seu nome? Está no índice ${myname.indexOf('a')}<br/>`;
+        document.body.innerHTML += `Qual o último índice da letra "a" no seu nome? Está no índice ${myname.lastIndexOf('a')}<br/>`;
+        document.body.innerHTML += `As últimas três letras do seu nome são: ${myname.slice(-3)}<br/>`;
+        document.body.innerHTML += `As palavras do seu nome são: ${myname.split(' ')}<br/>`;
+        document.body.innerHTML += `Seu nome em caixa alta: ${myname.toUpperCase()}<br/>`;
+        document.body.innerHTML += `Seu nome em lowercase: ${myname.toLowerCase()}<br/>`;
+    </script>
 </body>
 </html>
+

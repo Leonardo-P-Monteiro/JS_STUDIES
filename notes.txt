@@ -1,3 +1,4 @@
+- 
 
 
 ################################################################################
@@ -6,7 +7,7 @@
 Java Script:
     Obs.: Gere um título condizente com o que se pede abaixo.
 
-    - as_table e as_p e todas as outras formas de as_* em forms:
+    - Tipos de variáveis em JS.:
         - Introdução sobre o assunto.
         - O que é e o que faz?
         - Sintaxe;
