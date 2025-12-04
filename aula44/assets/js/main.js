@@ -3,8 +3,16 @@ const form = document.querySelector("#formulario");
 
 form.addEventListener('submit', function (e) {
     e.preventDefault();
-    console.log('Evento Cancelado');
-    setResultado('Resultado enviado.')
+    const inputPeso = e.target.querySelector('#peso');
+    const peso = Number(inputPeso.value);
+    const inputAltura = e.target.querySelector('#altura');
+    const altura = Number(inputAltura.value);
+
+    if (!peso || !altura) {
+        setResultado('Altura ou peso não são valores válidos. Corrija.', false);
+        return;
+    };
+
 });
 
 
@@ -16,9 +24,12 @@ function criaP () {
 
 
 // Resultado do processamento dos dados do formulário.
-function setResultado(msg) {
+function setResultado(msg, isValid) {
     const resultado = document.querySelector('#resultado');
     resultado.innerHTML = '';
     const p = criaP();
+    p.innerHTML = msg;
+    resultado.append(p);
+    // ▶️ PARAMOS A AULA AQUI: 35:10 MINUTOS.
 };
 
