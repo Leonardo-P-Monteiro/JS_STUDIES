@@ -1,15 +1,10 @@
-// 1. Inicia a "chamada" para a URL da API
-fetch('https://jsonplaceholder.typicode.com/todos')
+const pontuacao = 49
+// Isso é um operador ternário.
+const eAlta = pontuacao > 70 ? 'Sim, é alta.' : 'Não, é baixa.'
 
-    // 2. Quando a resposta inicial chegar...
-    .then(response => {
-        // ...nós a convertemos de "resposta HTTP" para "dados JSON".
-        return response.json(); 
-    })
+// Isso é uma operação de curto-circuito.
+const corFundo = '' // Significa um valor false
+const corPadrao = corFundo || 'Preto' // Pra fazer no python é só substituir "||" por "or".
 
-    // 3. Quando a conversão para JSON terminar...
-    .then(data => {
-        // ...'data' agora é a lista de tarefas! 
-        // Vamos exibir os dados no console para ver.
-        console.log(data);
-    });
+console.log(eAlta)
+console.log(corPadrao)

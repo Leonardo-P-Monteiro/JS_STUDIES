@@ -10,10 +10,13 @@ DE ANÁLISE DOS PESOS. 46:47
 const form = document.querySelector("#formulario");
 
 form.addEventListener('submit', function (e) {
+    
     e.preventDefault();
+
     const inputPeso = e.target.querySelector('#peso');
-    const peso = Number(inputPeso.value);
     const inputAltura = e.target.querySelector('#altura');
+    
+    const peso = Number(inputPeso.value);
     const altura = Number(inputAltura.value);
 
     if (!peso || !altura) {
@@ -23,9 +26,11 @@ form.addEventListener('submit', function (e) {
 
     const imc = getIMC(peso, altura);
     const nivelIMC = getNivelIMC(parseFloat(imc));
-    // setResultado('', true)
-    console.log(imc);
-    console.log(nivelIMC);
+    const msg = `Seu IMC é ${imc} - (${nivelIMC})`
+
+    setResultado(msg, true)
+
+    console.log(imc, nivelIMC);
 
 });
 
@@ -82,10 +87,17 @@ function criaP () {
 function setResultado(msg, isValid) {
     const resultado = document.querySelector('#resultado');
     resultado.innerHTML = '';
+    const p = criaP();
+    
     if (!isValid) {
-        const p = criaP();
-        p.innerHTML = msg;
-        resultado.append(p);
-        };
+        p.classList.add('bad')
+        } else {
+        p.classList.add('paragrafo-resultado')
+        }
+
+    p.innerHTML = msg;
+    resultado.append(p);
+    
+    
 };
 
