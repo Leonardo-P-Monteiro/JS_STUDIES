@@ -1,10 +1,13 @@
-const pontuacao = 49
-// Isso é um operador ternário.
-const eAlta = pontuacao > 70 ? 'Sim, é alta.' : 'Não, é baixa.'
+const num = [1, 2, 3, 4, 5, 6];
 
-// Isso é uma operação de curto-circuito.
-const corFundo = '' // Significa um valor false
-const corPadrao = corFundo || 'Preto' // Pra fazer no python é só substituir "||" por "or".
-
-console.log(eAlta)
-console.log(corPadrao)
+for (let i of num) {
+    if (i === 0) {
+        continue;
+    } else if ((i % 2) === 0) {
+        console.log(i, '= Par.');
+    } else if (i === 5) {
+        break;
+    } else {
+        console.log(i, '= Ímpar');
+    };
+};
