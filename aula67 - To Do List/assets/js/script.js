@@ -19,11 +19,27 @@ const creatListItem = () => {
   return li;
 };
 
+// #6 Creating the button delete task
+function createButtonDelete (li) {
+  li.innerHTML += ' ';
+  const buttonDelete = document.createElement('button');
+  buttonDelete.innerText = 'Apagar';
+  li.appendChild(buttonDelete);
+}
+
+// #5 cleaning the input field.
+const clearInput = () => {
+  inputTask.value = '';
+  inputTask.focus();
+};
+
 // #2 Inputting tasks on list to do.
 function creatTask(task) {
   const li = creatListItem();
   li.innerHTML = task;
   tasks.appendChild(li);
+  clearInput();
+  createButtonDelete(li)
 }
 
 // #1 Catching the button event
