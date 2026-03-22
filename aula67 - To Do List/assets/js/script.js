@@ -50,7 +50,8 @@ btnTask.addEventListener("click", () => {
   creatTask(inputTask.value);
 });
 
-// Listening the delete button.
+
+// #7 Listening the delete button.
 document.addEventListener("click", function (e) {
   const element = e.target;
 
