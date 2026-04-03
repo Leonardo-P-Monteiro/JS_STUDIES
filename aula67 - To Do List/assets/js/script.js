@@ -57,6 +57,7 @@ document.addEventListener("click", function (e) {
 
   if (element.classList.contains("apagar")) {
     element.parentElement.remove();
+    saveTasks();
   }
 });
 
@@ -73,5 +74,15 @@ function saveTasks () {
   
   const tasksJSON = JSON.stringify(listTasks);
   localStorage.setItem('tasks', tasksJSON);
-  console.log(tasksJSON)
 };
+
+const addTasksSaved = () => {
+  const tasksRetrieve = localStorage.getItem('tasks');
+  const tasksReconvertList = JSON.parse(tasksRetrieve);
+  
+  for (let i of tasksReconvertList) {
+    creatTask(i);
+  };
+};
+
+addTasksSaved();
