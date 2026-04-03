@@ -2,7 +2,6 @@ const inputTask = document.querySelector(".input-task");
 const btnTask = document.querySelector(".btn-task");
 const tasks = document.querySelector(".tasks");
 
-// PARAMOS NO MEIO DA AULA.
 
 // #4 Hearing the event of press key enter
 inputTask.addEventListener("keypress", function (e) {
@@ -42,6 +41,7 @@ function creatTask(task) {
   tasks.appendChild(li);
   clearInput();
   createButtonDelete(li);
+  saveTasks();
 }
 
 // #1 Catching the button event
@@ -59,3 +59,19 @@ document.addEventListener("click", function (e) {
     element.parentElement.remove();
   }
 });
+
+function saveTasks () {
+  const liTasks = tasks.querySelectorAll('li');
+  const listTasks = [];
+
+  for (let task of liTasks) {
+    let textTask = task.innerText;
+    textTask = textTask.replace('Apagar', '').trim();
+    listTasks.push(textTask);
+    
+  };
+  
+  const tasksJSON = JSON.stringify(listTasks);
+  localStorage.setItem('tasks', tasksJSON);
+  console.log(tasksJSON)
+};
