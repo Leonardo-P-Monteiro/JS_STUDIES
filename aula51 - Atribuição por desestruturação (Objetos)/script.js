@@ -20,5 +20,6 @@ const {
 console.log(n_person, 
     street, 
     n, 
-    country
+    country,
+    age
 )
