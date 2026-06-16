@@ -9,4 +9,4 @@ for (let i = 0; i < tasks.length; i++) {
 };
 
 console.log(tasks);
-tasks.push
+tasks.push 

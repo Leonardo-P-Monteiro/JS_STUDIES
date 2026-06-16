@@ -1,4 +1,9 @@
-- 
+- Conceito de objetos;
+- Criação de objetos via "new";
+- Métodos dentro de objetos;
+- deletar propriedades de um objeto;
+- off: Buscar entender a diferença entre factory functions e Constructor Functions
+RETORMAR AULA 89 EM 16 MINUTOS
 
 
 ################################################################################
