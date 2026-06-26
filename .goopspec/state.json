@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "project": {
+    "name": "JS_STUDIES",
+    "initialized": "2026-06-24T00:38:49.162Z"
+  },
+  "workflow": {
+    "currentPhase": null,
+    "phase": "idle",
+    "mode": "standard",
+    "depth": "standard",
+    "researchOptIn": false,
+    "specLocked": false,
+    "acceptanceConfirmed": false,
+    "interviewComplete": false,
+    "interviewCompletedAt": null,
+    "currentWave": 0,
+    "totalWaves": 0,
+    "lastActivity": "2026-06-24T01:10:04.542Z",
+    "status": "idle"
+  },
+  "execution": {
+    "activeCheckpointId": null,
+    "completedPhases": [],
+    "pendingTasks": []
+  }
+}

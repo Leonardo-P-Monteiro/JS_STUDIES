@@ -1,0 +1,101 @@
+[
+  {
+    "timestamp": "2026-06-24T00:38:49.164Z",
+    "type": "phase_change",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "event": "session.created"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:38:49.189Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:38:49.332Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:39:01.311Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:39:10.514Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:39:14.082Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "phase": "after",
+      "tool": "read",
+      "callID": "call_e3dd6468859a4ae3966419b1",
+      "title": "aula89 - Objetos e Prototypes\\niveis_protecao_global.js"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:41:12.800Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T00:43:07.847Z",
+    "type": "tool_call",
+    "sessionId": "ses_108ef45bbffe4Cej3mh0uZ8QdM",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T01:09:23.989Z",
+    "type": "phase_change",
+    "sessionId": "ses_108d34671ffe9QarWYcAR6bO1i",
+    "data": {
+      "event": "session.created"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T01:09:24.014Z",
+    "type": "tool_call",
+    "sessionId": "ses_108d34671ffe9QarWYcAR6bO1i",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  },
+  {
+    "timestamp": "2026-06-24T01:10:04.543Z",
+    "type": "tool_call",
+    "sessionId": "ses_108d34671ffe9QarWYcAR6bO1i",
+    "data": {
+      "type": "chat_message",
+      "agent": "plan"
+    }
+  }
+]

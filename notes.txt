@@ -1,9 +1,15 @@
-- Conceito de objetos;
-- Criação de objetos via "new";
-- Métodos dentro de objetos;
-- deletar propriedades de um objeto;
-- off: Buscar entender a diferença entre factory functions e Constructor Functions
-RETORMAR AULA 89 EM 16 MINUTOS
+Aula sobre: - Object.defineProperty() e Object.defineProperties()
+
+- Mencione esse trecho a título de consciência de fundamento.
+    3 níveis principais para proteger objetos, indo do mais fraco ao mais forte:
+        Object.preventExtensions(obj): Impede apenas que novas propriedades sejam adicionadas. (Você ainda pode alterar e deletar as que existem).
+        Object.seal(obj) ("Selar"): Impede adicionar e deletar. (Você ainda pode alterar o valor das que já existem).
+        Object.freeze(obj) ("Congelar"): O mais forte. Impede adicionar, deletar e alterar. O objeto fica 100% trancado (no primeiro nível).
+
+- Object.defineProperty()
+
+- Object.defineProperties()
+ 
 
 
 ################################################################################
