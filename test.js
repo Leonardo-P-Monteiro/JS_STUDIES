@@ -1,16 +1,4 @@
-
-function recursive (max) {
-
-    if (max === 200) {
-        return console.log(`Fim - ${max}`)
-    };
-
-    console.log(max)    
-
-    max++;
-
-    recursive(max);
+function Camiseta (nome, preco, cor) {
+    Produto.call(this, nome, preco);
+    this.cor = cor;
 };
-
-
-recursive(1)
