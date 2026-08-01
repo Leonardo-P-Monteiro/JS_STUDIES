@@ -1,0 +1,4 @@
+Aula sobre classes em JS.
+    - palavra class
+    - métodos
+    - 
