@@ -1,10 +1,10 @@
-# Aula: Classes em JavaScript
+# Aula: Classes e Herança em JavaScript
 
 ## Abertura com Analogia Prática
 
-**Qual problema as Classes resolvem?**
+**Qual problema as Classes e a Herança resolvem?**
 
-Lembra de como você criava Constructor Functions? Algo assim:
+Lembra de como você criava Constructor Functions e implementava herança na Aula 3 de Prototypes? Era algo assim:
 
 ```js
 function Produto(nome, preco) {
@@ -14,45 +14,63 @@ function Produto(nome, preco) {
 Produto.prototype.descricao = function() {
     return `${this.nome} custa R$${this.preco}`;
 };
+
+// Herança à moda antiga:
+function Camiseta(nome, preco, cor) {
+    Produto.call(this, nome, preco); // 1. Empresta construtor
+    this.cor = cor;
+}
+Camiseta.prototype = Object.create(Produto.prototype); // 2. Liga prototypes
+Camiseta.prototype.constructor = Camiseta;              // 3. Corrige construtor
 ```
 
-Funcionava — mas era **bagunçado**. O construtor ficava num lugar, os métodos em outro (`prototype`), a herança era um quebra-cabeça com `call()` e `Object.create()`. Parecia montar um móvel sem manual.
+Funcionava — mas era **verboso, frágil e espalhado**. O construtor ficava num lugar, os métodos em outro (`prototype`), e a herança exigia três passos manuais complexos (`call()`, `Object.create()`, redefinir `constructor`). Parecia montar um móvel de 50 peças sem marcações de encaixe.
 
-**A `class` é o manual de montagem.**
+---
 
-Pense numa **fábrica de carros**. Antes das classes, cada peça (construtor, métodos, herança) ficava espalhada em setores diferentes da fábrica, e você precisava saber exatamente onde cada parafuso ia. A `class` é como uma **linha de montagem moderna**: todas as peças ficam organizadas num único lugar, na ordem certa, com instruções claras. O carro final é o mesmo — mas montar ficou muito mais fácil.
+### A Analogia da Linha de Montagem e da Plataforma Modular
 
-💡 *Curiosidade histórica: a palavra-chave `class` foi introduzida no ES6 (2015), mas por baixo dos panos ela faz exatamente o que Constructor Functions + Prototype já faziam. O comitê TC39 do JavaScript chamou isso de "syntactic sugar" (açúcar sintático) — é a mesma comida, só que com uma apresentação mais bonita no prato.*
+Pense numa **fábrica automotiva moderna**:
+1. **A `class` básica** é como a **planta de um modelo de carro padrão**: motor, chassi, portas e painel descritos em um único manual integrado e organizado.
+2. **A Herança (`extends` e `super`)** é o conceito de **plataforma compartilhada**: a fábrica cria uma plataforma-base (`Veiculo`) com as peças comuns (rodas, motor, acelerador). Quando decide produzir um modelo específico (`CarroEletrico` ou `Caminhao`), ela não desenha tudo do zero. Ela **estende** a plataforma-base (`extends`) e aciona a linha de montagem principal para montar a base (`super()`), adicionando apenas o que é exclusivo do novo modelo (como a bateria de alta voltagem ou a caçamba).
+
+O resultado no objeto final é exatamente o mesmo que o sistema de prototypes gerava — mas o processo de fabricação ficou limpo, legível e à prova de falhas.
+
+💡 *Curiosidade histórica: a palavra-chave `class` e os operadores `extends` / `super` foram introduzidos no ES6 (2015). Por baixo dos panos, o motor do JavaScript continua usando protótipos (`__proto__` e `prototype`). Por isso, dizemos que a sintaxe de classes é um **"açúcar sintático" (syntactic sugar)**: a receita interna é a mesma, mas a apresentação e a ergonomia de escrita são infinitamente melhores.*
+
+💡 *O termo `super` vem de **superclasse** (a classe "pai" ou superior na árvore genealógica de herança).*
 
 ---
 
 ## Visualização com Diagramas
 
-### Constructor Function vs Class — mesma mecânica, embalagem diferente
+### 1. Constructor Function vs Class (com Herança)
 
 ```mermaid
 flowchart LR
-    subgraph CF["Constructor Function (modo antigo)"]
+    subgraph CF["Constructor Function (Modo Antigo)"]
         A["function Produto(nome, preco)"] --> B["Produto.prototype.descricao = ..."]
-        B --> C["Herança: Produto.call() + Object.create()"]
+        B --> C["Produto.call(this, ...)"]
+        C --> D["Object.create(Produto.prototype)"]
+        D --> E["Camiseta.prototype.constructor = Camiseta"]
     end
 
-    subgraph CL["class (modo moderno)"]
-        D["class Produto"] --> E["constructor(nome, preco)"]
-        E --> F["descricao() — dentro da classe"]
-        F --> G["extends + super() — herança limpa"]
+    subgraph CL["class + extends (Modo Moderno)"]
+        F["class Produto { ... }"] --> G["class Camiseta extends Produto"]
+        G --> H["constructor(...) { super(...); }"]
+        H --> I["Métodos no corpo da classe"]
     end
 
-    CF -- "Mesmo resultado\nno __proto__" --> CL
+    CF -- "Produzem exatamente a mesma\ncadeia de Prototypes" --> CL
 
     style CF fill:#4a1942,stroke:#e74c3c,color:#fff
     style CL fill:#1a3a2a,stroke:#2ecc71,color:#fff
 ```
-*Ambos produzem a mesma cadeia de prototypes. A classe apenas organiza tudo num único bloco.*
+*Ambas as abordagens criam a mesma estrutura interna na memória, mas a sintaxe moderna elimina o trabalho manual suscetível a erros.*
 
 ---
 
-### Anatomia interna de uma Classe
+### 2. Diagrama de Classes e Hierarquia
 
 ```mermaid
 classDiagram
@@ -61,6 +79,7 @@ classDiagram
         +Number preco
         +constructor(nome, preco)
         +descricao() String
+        +desconto(porcentagem) Number
     }
 
     class Camiseta {
@@ -69,30 +88,61 @@ classDiagram
         +descricao() String
     }
 
+    class Caneca {
+        +String material
+        +constructor(nome, preco, material)
+        +descricao() String
+    }
+
     Produto <|-- Camiseta : extends
+    Produto <|-- Caneca : extends
 ```
-*A herança com `extends` substitui toda aquela dança de `Camiseta.prototype = Object.create(Produto.prototype)` que você viu na aula de Prototypes.*
+*`Camiseta` e `Caneca` herdam `nome`, `preco` e métodos de `Produto`, acrescentando suas próprias particularidades.*
+
+---
+
+### 3. O Fluxo de Execução com `new` e `super()`
+
+```mermaid
+sequenceDiagram
+    participant Dev as Desenvolvedor
+    participant Sub as new Camiseta("Regata", 40, "Azul")
+    participant CCons as constructor de Camiseta
+    participant PCons as constructor de Produto (super)
+
+    Dev->>Sub: Executa new Camiseta(...)
+    Sub->>CCons: Inicia construtor da subclasse
+    Note over CCons: this AINDA NÃO existe!
+    CCons->>PCons: super("Regata", 40)
+    Note over PCons: Cria o this e define:
+    Note over PCons: this.nome = "Regata"
+    Note over PCons: this.preco = 40
+    PCons-->>CCons: Retorna o this inicializado
+    Note over CCons: this.cor = "Azul"
+    CCons-->>Dev: Objeto Camiseta completo pronto para uso
+```
+*O operador `super()` é o responsável por invocar o construtor pai e liberar o uso da palavra `this` no construtor filho.*
 
 ---
 
 ## Sintaxe, Argumentos e Anatomia
 
-### Anatomia Básica
+### Anatomia Básica de uma Classe
 
 ```js
 class NomeDaClasse {
-    // 1. CONSTRUCTOR — inicializa as propriedades
+    // 1. CONSTRUCTOR — inicializa as propriedades da instância
     constructor(param1, param2) {
         this.prop1 = param1;
         this.prop2 = param2;
     }
 
-    // 2. MÉTODOS — vão direto no prototype (sem "function"!)
+    // 2. MÉTODOS — vão direto para o prototype (sem "function" e sem vírgula!)
     meuMetodo() {
         return this.prop1;
     }
 
-    // 3. GETTERS e SETTERS — igual ao que você já estudou!
+    // 3. GETTERS e SETTERS — atuam como propriedades computadas/validadas
     get resumo() {
         return `${this.prop1} - ${this.prop2}`;
     }
@@ -102,185 +152,332 @@ class NomeDaClasse {
         this.prop1 = valor;
     }
 
-    // 4. MÉTODOS ESTÁTICOS — pertencem à CLASSE, não às instâncias
+    // 4. MÉTODOS ESTÁTICOS — pertencem à CLASSE, e não às instâncias
     static criarPadrao() {
-        return new NomeDaClasse('padrão', 0);
+        return new NomeDaClasse('Padrão', 0);
     }
 }
 ```
 
+---
+
+### Anatomia da Herança: `extends` e `super`
+
+```js
+// CLASSE PAI (Superclasse / Classe Base)
+class Dispositivo {
+    constructor(nome) {
+        this.nome = nome;
+        this.ligado = false;
+    }
+
+    ligar() {
+        if (this.ligado) {
+            console.log(`${this.nome} já está ligado.`);
+            return;
+        }
+        this.ligado = true;
+    }
+
+    desligar() {
+        this.ligado = false;
+    }
+}
+
+// CLASSE FILHA (Subclasse / Classe Derivada)
+class Smartphone extends Dispositivo {
+    constructor(nome, modelo, cor) {
+        // 1. super() invoca o constructor de Dispositivo
+        // OBRIGATÓRIO chamar antes de acessar 'this'
+        super(nome);
+
+        // 2. Propriedades exclusivas da subclasse
+        this.modelo = modelo;
+        this.cor = cor;
+    }
+
+    // 3. Sobrescrita de método (Method Overriding) com reaproveitamento do pai
+    ligar() {
+        console.log('Verificando bateria do smartphone...');
+        super.ligar(); // Chama o método ligar() da classe pai (Dispositivo)
+        console.log(`Tela do ${this.modelo} acesa.`);
+    }
+
+    // 4. Método exclusivo da subclasse
+    fazerChamada(numero) {
+        if (!this.ligado) {
+            console.log(`Ligue o ${this.nome} primeiro!`);
+            return;
+        }
+        console.log(`Discando para ${numero}...`);
+    }
+}
+```
+
+---
+
 ### Detalhamento Crítico Linha por Linha
 
-| Elemento | O que faz | Obrigatório? | Equivalente antigo |
+| Elemento | O que faz | Obrigatório? | Equivalente Antigo (Prototypes) |
 | :--- | :--- | :---: | :--- |
-| `class NomeDaClasse` | Declara a classe (deve ser PascalCase) | ✅ | `function NomeDaClasse()` |
-| `constructor()` | Função executada ao usar `new`. Inicializa `this` | Não* | O corpo da Constructor Function |
-| Métodos (ex: `meuMetodo()`) | Funções no prototype — **sem** `function`, **sem** vírgula | Não | `NomeDaClasse.prototype.metodo = function() {}` |
-| `get` / `set` | Getters e Setters — comportam-se como propriedades | Não | `Object.defineProperty()` com get/set |
-| `static metodo()` | Método acessível via `NomeDaClasse.metodo()`, não via instância | Não | `NomeDaClasse.metodo = function() {}` |
+| `class Nome` | Declara uma classe (deve usar **PascalCase**) | ✅ | `function Nome() {}` |
+| `constructor()` | Função executada ao usar `new`. Inicializa o `this` | Não* | O corpo da Constructor Function |
+| `extends SuperClasse` | Estabelece a ligação de protótipos entre as classes | Não | `Sub.prototype = Object.create(Super.prototype)` |
+| `super(...)` | Invoca o construtor da classe pai e constrói o `this` | ✅ (se houver `constructor` na subclasse) | `SuperClasse.call(this, ...)` |
+| `super.metodo()` | Chama a versão do método que pertence à classe pai | Não | `SuperClasse.prototype.metodo.call(this)` |
+| Métodos (ex: `ligar()`) | Funções inseridas no `.prototype` — sem palavra `function` | Não | `Classe.prototype.ligar = function() {}` |
+| `get` / `set` | Getters e Setters integrados diretamente no corpo | Não | `Object.defineProperty(..., { get, set })` |
+| `static metodo()` | Método da função construtora, chamado via `Classe.metodo()` | Não | `Classe.metodo = function() {}` |
 
-> \* *Se omitido, o JS cria um `constructor()` vazio automaticamente.*
+> \* *Se o `constructor` for omitido em uma classe simples, o JS cria `constructor() {}` automaticamente. Se for omitido em uma subclasse com `extends`, o JS repassa os argumentos automaticamente: `constructor(...args) { super(...args); }`.*
+
+---
 
 ### Regras de Ouro e Pitfalls
 
-⚠️ **Classes não sofrem hoisting como funções!**
+⚠️ **`super()` DEVE ser chamado ANTES de qualquer uso de `this` no construtor filho!**
 ```js
-const p = new Produto(); // ❌ ReferenceError!
-class Produto {}
-```
-Com Constructor Functions, `function Produto() {}` sofria hoisting e funcionava em qualquer ordem. Com `class`, **não**. Você precisa declarar a classe ANTES de usá-la.
-
-⚠️ **Não use vírgula entre métodos!**
-```js
-class Errado {
-    metodo1() {},  // ❌ SyntaxError!
-    metodo2() {}
+class Smartphone extends Dispositivo {
+    constructor(nome, modelo) {
+        this.modelo = modelo; // ❌ ReferenceError: Must call super constructor in derived class before accessing 'this'
+        super(nome);
+    }
 }
 ```
-Diferente de objetos literais, métodos dentro de classes são separados por **nada** (apenas quebra de linha).
+Na especificação do JavaScript, o objeto `this` de uma subclasse só passa a existir fisicamente na memória depois que o `super()` executa o construtor pai.
 
-⚠️ **O corpo da classe roda em strict mode automaticamente!**
-Variáveis não declaradas, `this` global acidental — tudo gera erro imediatamente.
+⚠️ **Não esqueça de repassar os argumentos ao `super()`!**
+Se a classe pai espera `nome` no `constructor(nome)` e você apenas chamar `super()`, a propriedade `this.nome` ficará com valor `undefined`.
 
-✅ **Sempre use PascalCase** para nomes de classes: `Produto`, `ContaBancaria`, `UsuarioAdmin`.
+⚠️ **Classes NÃO sofrem hoisting como funções!**
+```js
+const p = new Produto(); // ❌ ReferenceError: Cannot access 'Produto' before initialization
+class Produto {}
+```
+Você deve sempre declarar as classes no início do código ou antes do ponto de instanciação.
 
-✅ **Mantenha o constructor enxuto** — apenas atribua propriedades. Lógica complexa vai em métodos separados.
+⚠️ **Não use vírgulas entre métodos!**
+Dentro do corpo da classe, os métodos são separados apenas por quebras de linha e chaves, **nunca** por vírgulas como em objetos literais.
 
-💡 **`typeof` de uma classe retorna `"function"`** — mais uma prova de que classes são Constructor Functions disfarçadas.
+⚠️ **O corpo da classe roda em Strict Mode por padrão!**
+Atribuições acidentais a variáveis globais, duplicação incorreta de parâmetros ou acessos inválidos geram erros imediatos.
+
+✅ **Subclasse "é um" tipo da Superclasse:** Use herança apenas quando fizer sentido conceitual (um `Smartphone` *é um* `Dispositivo`, uma `Camiseta` *é um* `Produto`).
+
+💡 **O operador `instanceof` reconhece toda a árvore de herança:**
+```js
+const cel = new Smartphone('iPhone', '15 Pro', 'Titânio');
+console.log(cel instanceof Smartphone); // true
+console.log(cel instanceof Dispositivo); // true (pois herda de Dispositivo!)
+console.log(cel instanceof Object);     // true (tudo descende de Object!)
+```
 
 ---
 
 ## Exemplos de Código em Duas Camadas
 
-### Camada 1: Exemplo Isolado (Mecânica Pura)
+### Camada 1: Exemplo Isolado (Mecânica Pura de Classes e Herança)
 
 ```js
-// Definindo uma classe simples
+// 1. Classe Base (Superclasse)
 class Animal {
-    // O constructor recebe os dados e guarda no this
-    constructor(nome, tipo) {
-        this.nome = nome;  // propriedade da instância
-        this.tipo = tipo;
+    constructor(nome, idade) {
+        this.nome = nome;
+        this.idade = idade;
     }
 
-    // Método — vai automaticamente para Animal.prototype
-    apresentar() {
-        return `Eu sou ${this.nome}, um ${this.tipo}.`;
+    // Método compartilhado no prototype
+    falar() {
+        return `${this.nome} emitiu um som.`;
     }
 
-    // Getter — acesso como propriedade, não como função
-    get nomeUpperCase() {
-        return this.nome.toUpperCase();
-    }
-
-    // Setter — validação ao atribuir
-    set novoNome(valor) {
-        if (valor.length < 2) {
-            console.log('⚠️ Nome muito curto!');
-            return;
-        }
-        this.nome = valor;
-    }
-
-    // Método estático — pertence à classe, NÃO à instância
-    static criarGato(nome) {
-        return new Animal(nome, 'Gato');
+    // Getter
+    get info() {
+        return `${this.nome} (${this.idade} anos)`;
     }
 }
 
-// Criando instâncias com new
-const rex = new Animal('Rex', 'Cachorro');
-console.log(rex.apresentar());   // "Eu sou Rex, um Cachorro."
-console.log(rex.nomeUpperCase);  // "REX" (getter, sem parênteses!)
+// 2. Subclasse Cão que herda de Animal
+class Cachorro extends Animal {
+    constructor(nome, idade, raca) {
+        super(nome, idade); // Inicializa 'nome' e 'idade' no construtor de Animal
+        this.raca = raca;   // Inicializa 'raca' na subclasse
+    }
 
-rex.novoNome = 'A';              // "⚠️ Nome muito curto!" (setter validou)
-rex.novoNome = 'Thor';           // Agora aceita!
-console.log(rex.nome);           // "Thor"
+    // Sobrescrita de método (Override)
+    falar() {
+        return `${this.nome} (${this.raca}) latiu: Au au! 🐶`;
+    }
 
-// Método estático — chamado na CLASSE, não no objeto
-const mimi = Animal.criarGato('Mimi');
-console.log(mimi.apresentar());  // "Eu sou Mimi, um Gato."
+    // Método exclusivo da subclasse
+    abanarRabo() {
+        return `${this.nome} está feliz abanando o rabo!`;
+    }
+}
 
-// Prova de que é prototype:
-console.log(rex.__proto__ === Animal.prototype); // true
-console.log(typeof Animal);                      // "function" ← Açúcar sintático!
+// 3. Subclasse Gato que reaproveita o método do pai
+class Gato extends Animal {
+    constructor(nome, idade, corPelagem) {
+        super(nome, idade);
+        this.corPelagem = corPelagem;
+    }
+
+    falar() {
+        // Usa super.falar() para pegar o som genérico e adiciona o miado
+        const somBase = super.falar();
+        return `${somBase} Especificamente um miado: Miau! 🐱`;
+    }
+}
+
+// Instanciação e testes
+const rex = new Cachorro('Rex', 3, 'Pastor Alemão');
+console.log(rex.info);         // "Rex (3 anos)" -> herdado de Animal
+console.log(rex.falar());        // "Rex (Pastor Alemão) latiu: Au au! 🐶" -> sobrescrito
+console.log(rex.abanarRabo());   // "Rex está feliz abanando o rabo!" -> exclusivo
+
+const mimi = new Gato('Mimi', 2, 'Branco');
+console.log(mimi.falar());       // "Mimi emitiu um som. Especificamente um miado: Miau! 🐱"
+
+// Verificação de tipos e protótipos
+console.log(rex instanceof Cachorro); // true
+console.log(rex instanceof Animal);   // true
+console.log(rex instanceof Object);   // true
 ```
 
 ---
 
-### Camada 2: Exemplo Contextualizado (seu projeto!)
+### Camada 2: Exemplo Contextualizado (Seus Projetos: To Do List & Produtos)
 
-Lembra do seu projeto de **To Do List** (aula67)? E da forma como trabalhava com objetos na aula89? Vamos imaginar esse To Do reescrito com classes:
+Lembra do seu projeto de **To Do List** (aula67 e `POO em JS/1 - Classes/script.js`)? Vamos evoluir a sua classe `Task` criando subclasses especializadas para **Tarefas com Prazo** e **Tarefas Recorrentes**, conectando com o `Date` que você estudou na aula46:
 
 ```js
-// Antes — estilo Constructor Function (como na aula89)
-function Tarefa(texto) {
-    this.texto = texto;
-    this.concluida = false;
-    this.criadaEm = new Date();  // ← usou Date na aula46!
-}
-Tarefa.prototype.concluir = function() {
-    this.concluida = true;
-};
-Tarefa.prototype.descricao = function() {
-    return `[${this.concluida ? '✅' : '⬜'}] ${this.texto}`;
-};
-
-// -------------------------------------------------------
-
-// Depois — estilo Class (limpo e organizado!)
-class Tarefa {
-    constructor(texto) {
-        this.texto = texto;
-        this.concluida = false;
-        this.criadaEm = new Date();
+// CLASSE BASE: Tarefa geral
+class Task {
+    constructor(title, description) {
+        this.title = title;
+        this.description = description;
+        this.complete = false;
+        this.createdAt = new Date(); // Usou Date na aula46!
     }
 
-    concluir() {
-        this.concluida = true;
+    conclusion() {
+        this.complete = true;
     }
 
-    // Getter — lembra do que viu na aula de Getters e Setters?
-    // Agora fica DENTRO da classe, tudo junto!
-    get descricao() {
-        return `[${this.concluida ? '✅' : '⬜'}] ${this.texto}`;
+    get descriptionTask() {
+        const icon = this.complete ? '✅' : '⬜';
+        return `${icon} [${this.title}] - ${this.description}`;
     }
 
-    // Setter com validação — igual ao padrão que estudou!
-    set novoTexto(valor) {
-        if (typeof valor !== 'string' || valor.trim() === '') {
-            throw new Error('Texto inválido!');
+    set newDescription(value) {
+        if (typeof value !== 'string' || value.trim() === '') {
+            throw new Error('Texto inválido para a descrição.');
         }
-        this.texto = valor.trim();
+        this.description = value.trim();
     }
 
-    // Método estático — cria tarefa urgente sem repetir código
-    static criarUrgente(texto) {
-        const tarefa = new Tarefa(`🔴 URGENTE: ${texto}`);
-        return tarefa;
+    static createUrgent(title, description) {
+        return new Task(`⚠️ URGENTE: ${title}`, description);
     }
 }
 
-// Usando:
-const t1 = new Tarefa('Estudar Classes em JS');
-console.log(t1.descricao);  // "[⬜] Estudar Classes em JS"
+// SUBCLASSE: Tarefa com Prazo (DeadlinedTask)
+class DeadlinedTask extends Task {
+    constructor(title, description, deadlineDate) {
+        super(title, description); // Inicializa os dados básicos via Task
+        this.deadline = new Date(deadlineDate); // Propriedade exclusiva
+    }
 
-t1.concluir();
-console.log(t1.descricao);  // "[✅] Estudar Classes em JS"
+    // Sobrescrita do getter para exibir a data de entrega
+    get descriptionTask() {
+        const baseDescription = super.descriptionTask; // Reaproveita o texto da classe pai
+        const formattedDate = this.deadline.toLocaleDateString('pt-BR');
+        return `${baseDescription} ⏳ (Prazo: ${formattedDate})`;
+    }
 
-const t2 = Tarefa.criarUrgente('Entregar projeto');
-console.log(t2.descricao);  // "[⬜] 🔴 URGENTE: Entregar projeto"
+    // Método exclusivo da subclasse
+    isExpired() {
+        const today = new Date();
+        return today > this.deadline && !this.complete;
+    }
+}
+
+// -------------------------------------------------------------
+// Testando no console:
+
+const t1 = new Task('Estudar Classes', 'Compreender constructor, métodos e static');
+console.log(t1.descriptionTask); // "⬜ [Estudar Classes] - Compreender constructor, métodos e static"
+
+const t2 = new DeadlinedTask(
+    'Entregar Projeto JS',
+    'Submeter o código refatorado de POO',
+    '2026-12-31'
+);
+
+console.log(t2.descriptionTask); 
+// "⬜ [Entregar Projeto JS] - Submeter o código refatorado de POO ⏳ (Prazo: 31/12/2026)"
+
+t2.conclusion();
+console.log(t2.descriptionTask);
+// "✅ [Entregar Projeto JS] - Submeter o código refatorado de POO ⏳ (Prazo: 31/12/2026)"
+
+console.log('Está expirada?', t2.isExpired()); // false
 ```
 
-### Comparação Visual: Antes vs Depois
+---
 
-| Aspecto | Constructor Function | Class |
+### Comparação Visual e Técnica: Herança Antiga vs Herança Moderna
+
+Veja como o mesmo objetivo técnico é atingido nas duas abordagens:
+
+```js
+// ==========================================
+// 1. MODO ANTIGO (Constructor Functions)
+// ==========================================
+function Produto(nome, preco) {
+    this.nome = nome;
+    this.preco = preco;
+}
+Produto.prototype.aumento = function(quantia) {
+    this.preco += quantia;
+};
+
+function Camiseta(nome, preco, cor) {
+    Produto.call(this, nome, preco); // 1. Empresta lógica
+    this.cor = cor;
+}
+Camiseta.prototype = Object.create(Produto.prototype); // 2. Encadeia prototype
+Camiseta.prototype.constructor = Camiseta;              // 3. Corrige o ponteiro
+
+// ==========================================
+// 2. MODO MODERNO (Classes com extends)
+// ==========================================
+class Produto {
+    constructor(nome, preco) {
+        this.nome = nome;
+        this.preco = preco;
+    }
+    aumento(quantia) {
+        this.preco += quantia;
+    }
+}
+
+class Camiseta extends Produto {
+    constructor(nome, preco, cor) {
+        super(nome, preco); // Faz o call() e a ligação de uma só vez!
+        this.cor = cor;
+    }
+}
+```
+
+| Aspecto | Modo Antigo (Constructor Functions) | Modo Moderno (`class` + `extends`) |
 | :--- | :--- | :--- |
-| Construtor | `function Tarefa(texto) { ... }` | `constructor(texto) { ... }` dentro da class |
-| Métodos | `Tarefa.prototype.metodo = function() {}` | `metodo() {}` dentro da class |
-| Getters/Setters | `Object.defineProperty(Tarefa.prototype, ...)` | `get prop()` / `set prop()` dentro da class |
-| Herança | `Filho.call(this) + Object.create()` | `extends` + `super()` |
-| Leitura | Espalhado em vários blocos | **Tudo junto, num único bloco** |
+| **Declaração do Pai** | `function Produto(nome, preco) { ... }` | `class Produto { constructor(nome, preco) { ... } }` |
+| **Herança de Protótipo** | `Sub.prototype = Object.create(Pai.prototype)` | `class Sub extends Pai` |
+| **Correção de Construtor** | `Sub.prototype.constructor = Sub` | Automático pelo motor do JavaScript |
+| **Chamada ao Construtor Pai** | `Pai.call(this, arg1, arg2)` | `super(arg1, arg2)` |
+| **Acesso a Métodos do Pai** | `Pai.prototype.metodo.call(this)` | `super.metodo()` |
+| **Legibilidade e Manutenção** | Fragmentado em 4 a 5 trechos soltos | **Unificado, coeso e linear** |
 
 ---
 
@@ -288,53 +485,66 @@ console.log(t2.descricao);  // "[⬜] 🔴 URGENTE: Entregar projeto"
 
 ### Resumo Executivo
 
-- 🔹 `class` é **açúcar sintático** sobre Constructor Functions + Prototype — o motor do JS faz a mesma coisa por baixo.
-- 🔹 Tudo fica organizado num único bloco: `constructor`, métodos, getters/setters e `static`.
-- 🔹 Diferente de `function`, classes **não sofrem hoisting** — declare antes de usar.
+- 🔹 **`class` e `extends` são açúcar sintático**: simplificam drasticamente o uso de Constructor Functions e da cadeia de protótipos (`prototype chain`).
+- 🔹 **`super()` é a chave da herança**: deve ser invocado no construtor da subclasse antes de qualquer acesso ao `this`.
+- 🔹 **Reaproveitamento e Especialização**: subclasses herdam todos os métodos e getters da superclasse, podendo criar métodos novos ou sobrescrever (`override`) os existentes usando `super.metodo()`.
+
+---
 
 ### Visão de Debug
 
-Para validar se sua classe está funcionando, use o console do DevTools (F12 no Chrome):
+Para validar a hierarquia e inspecionar objetos criados com classes e herança no Console do DevTools (F12):
 
 ```js
-const obj = new MinhaClasse('teste');
+const item = new DeadlinedTask('Teste', 'Desc', '2026-12-31');
 
-// 1. Verificar se é instância
-console.log(obj instanceof MinhaClasse); // true
+// 1. Validar a árvore genealógica de herança
+console.log(item instanceof DeadlinedTask); // true
+console.log(item instanceof Task);          // true
+console.log(item instanceof Object);        // true
 
-// 2. Ver toda a estrutura do objeto
-console.dir(obj);
+// 2. Inspecionar a cadeia de protótipos (Prototype Chain)
+console.log(Object.getPrototypeOf(item));                       // Prototype de DeadlinedTask
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(item))); // Prototype de Task
 
-// 3. Verificar o prototype
-console.log(Object.getPrototypeOf(obj)); // mostra os métodos herdados
-
-// 4. Confirmar que class é function
-console.log(typeof MinhaClasse); // "function"
+// 3. Ver a árvore expandível no DevTools
+console.dir(item);
 ```
 
-💡 *O `console.dir()` é mais útil que `console.log()` para objetos — ele mostra a árvore de propriedades expandível, incluindo o `__proto__`.*
+💡 *Dica de Debug: Use `console.dir(instancia)` no DevTools do navegador. Ao expandir o objeto, você verá as propriedades próprias no topo e os métodos organizados em níveis sucessivos de `[[Prototype]]`.*
+
+---
 
 ### Conexões com o Futuro
 
-O que acabou de aprender é **fundação para tudo** que vem a seguir em POO:
-- **Herança com `extends` e `super()`** — próxima aula! Substitui todo o `call()` + `Object.create()` que você estudou.
-- **Polimorfismo** — que você já tem na pasta, vai ficar muito mais natural com classes.
-- **Encapsulamento com `#` (campos privados)** — evolução dos níveis de proteção que estudou com `defineProperty()`.
-- **Composição vs Herança** — padrões de design avançados usando classes.
+Dominar classes e herança básica abre portas imediatas para:
+- **Polimorfismo:** Tratar objetos de subclasses diferentes através de uma interface comum (ex: iterar uma lista de `[Task, DeadlinedTask]` chamando `item.descriptionTask` e cada uma respondendo com seu próprio formato).
+- **Campos Privados (`#`):** Proteger propriedades contra alterações externas sem depender de closures ou `Object.defineProperty`.
+- **Composição vs Herança:** Aprender quando estender uma classe e quando compor objetos usando múltiplos comportamentos modulares.
+
+---
 
 ### 🏋️ Desafio Prático
 
-Crie no arquivo `script.js` desta pasta uma classe chamada `ContaBancaria` com:
+Abra o arquivo `script.js` desta pasta e pratique implementando o seguinte cenário:
 
-1. `constructor` que recebe `titular` (string) e `saldoInicial` (number, default 0)
-2. Um **getter** `saldo` que retorna o saldo formatado: `"R$ 1.500,00"`
-3. Um **setter** `deposito` que só aceita números positivos (senão lança erro)
-4. Um método `sacar(valor)` que verifica se tem saldo suficiente
-5. Um método **static** `criarContaZerada(titular)` que cria uma conta com saldo 0
+Crie uma hierarquia bancária com **Classe Base** e **Subclasse**:
 
-**Dificuldade:** 🟡 Intermediário — combina `class` com getters/setters que você já estudou.
+1. Crie a classe base `ContaBancaria`:
+   - `constructor(titular, saldoInicial = 0)`
+   - Método `depositar(valor)` que soma ao saldo se o valor for positivo.
+   - Método `sacar(valor)` que desconta do saldo se houver saldo suficiente (retorna `true` se deu certo ou `false` se não houver saldo).
+   - Getter `saldoFormatado` que retorna `"R$ X.XXX,XX"`.
 
-*Quando terminar, me manda que eu corrijo e discuto a solução!*
+2. Crie a subclasse `ContaCorrente` que herda de `ContaBancaria`:
+   - `constructor(titular, saldoInicial, limite = 500)` -> repasse titular e saldo ao `super()`.
+   - Sobrescreva o método `sacar(valor)`: a `ContaCorrente` permite sacar usando o `saldo + limite`. Ao sacar, se o saldo próprio acabar, utiliza o limite.
+   - Método exclusivo `extrato()` que imprime titular, saldo e limite disponível.
+
+**Classificação de Dificuldade:**
+- 🟢 Básico: Criar a classe base `ContaBancaria` com constructor, métodos e getter.
+- 🟡 Intermediário: Criar a subclasse `ContaCorrente` com `extends`, `super()` e sobrescrita de `sacar()`.
+- 🔴 Avançado: Adicionar uma taxa fixa de R$ 2,00 a cada saque na `ContaCorrente` reaproveitando `super.sacar()` ou validando se o saldo + limite cobre o saque + taxa.
 
 ---
 
@@ -344,121 +554,158 @@ Tente responder antes de ver a resposta!
 
 ---
 
-**Questão 1:** Um desenvolvedor junior declara uma classe `Usuario` e logo em seguida tenta criar uma instância com `new Usuario('João')`. O código funciona perfeitamente. Porém, ao reorganizar o arquivo, ele move a chamada `new Usuario('João')` para **antes** da declaração `class Usuario`. O que acontece?
-
-- A) Funciona normalmente, pois classes sofrem hoisting igual a funções
-- B) Retorna `undefined` silenciosamente
-- C) Lança um `ReferenceError` porque classes não sofrem hoisting
-- D) Cria um objeto vazio `{}` sem propriedades
-
-<details>
-<summary>🔍 Ver resposta</summary>
-
-**C) Lança um `ReferenceError` porque classes não sofrem hoisting** — Diferente de `function declarations` (que você pode chamar antes de declarar), declarações `class` ficam na chamada "Temporal Dead Zone" até serem avaliadas. A alternativa A é o erro mais comum, pois o aluno assume que classes se comportam como funções tradicionais.
-
-</details>
-
----
-
-**Questão 2:** A equipe de front-end de uma startup precisa criar um método `validarEmail()` que deve funcionar **sem precisar criar uma instância** da classe `Validador`. Qual abordagem correta?
-
-- A) Definir `validarEmail()` como método normal dentro da classe
-- B) Usar `Validador.prototype.validarEmail = function() {}`
-- C) Declarar `validarEmail()` como `static` dentro da classe
-- D) Criar a função fora da classe e usar `this` nela
-
-<details>
-<summary>🔍 Ver resposta</summary>
-
-**C) Declarar `validarEmail()` como `static` dentro da classe** — Métodos `static` pertencem à classe em si, não ao prototype, então são chamados via `Validador.validarEmail()` sem precisar de `new`. A alternativa A criaria um método no prototype que só funciona em instâncias, e a B é o jeito antigo (Constructor Function) de fazer o equivalente a um método de instância, não estático.
-
-</details>
-
----
-
-**Questão 3:** Observe o código abaixo. Qual será a saída no console?
-
-```js
-class Teste {
-    constructor() {
-        this.x = 10;
-    }
-    getX() {
-        return this.x;
-    }
-}
-console.log(typeof Teste);
-```
-
-- A) `"class"`
-- B) `"object"`
-- C) `"function"`
-- D) `"undefined"`
-
-<details>
-<summary>🔍 Ver resposta</summary>
-
-**C) `"function"`** — Essa é a pegadinha! Apesar da sintaxe `class`, internamente o JavaScript transforma a classe em uma **função construtora**. Não existe um tipo `"class"` no JS. A alternativa A é a armadilha — parece lógico que `typeof class` retorne `"class"`, mas JavaScript não tem esse tipo primitivo.
-
-</details>
-
----
-
-**Questão 4:** Um dev está refatorando código antigo para usar classes. Ele escreve:
+**Questão 1:** Um desenvolvedor júnior está modelando um sistema de comércio eletrônico. Ele cria uma classe `Produto` e, em seguida, cria a subclasse `Livro` com o seguinte código:
 
 ```js
 class Produto {
     constructor(nome, preco) {
         this.nome = nome;
         this.preco = preco;
-    },
-    descricao() {
-        return `${this.nome}: R$${this.preco}`;
     }
 }
+
+class Livro extends Produto {
+    constructor(nome, preco, autor) {
+        this.autor = autor;
+        super(nome, preco);
+    }
+}
+
+const l1 = new Livro('Clean Code', 85, 'Robert Martin');
 ```
 
-Ao executar, recebe um erro. Por quê?
+Ao executar esse código no Node.js ou no navegador, o que acontece?
 
-- A) O `constructor` não pode receber mais de um parâmetro
-- B) Faltou a palavra `function` antes de `descricao()`
-- C) Há uma vírgula `,` após o `constructor`, o que é proibido em classes
-- D) O template literal não funciona dentro de métodos de classe
+- A) O objeto `l1` é criado normalmente com as três propriedades.
+- B) A propriedade `autor` fica como `undefined`, mas o código não quebra.
+- C) Ocorre um `ReferenceError`, pois `this` foi acessado antes da invocação do `super()`.
+- D) O JavaScript ignora a linha do `super()` e apenas define `this.autor`.
 
 <details>
 <summary>🔍 Ver resposta</summary>
 
-**C) Há uma vírgula `,` após o `constructor`, o que é proibido em classes** — Em objetos literais, propriedades são separadas por vírgulas. Mas dentro de `class`, métodos são separados apenas por quebra de linha, **sem vírgulas**. A alternativa B é armadilha: dentro de classes, você NÃO usa `function` — é justamente essa a simplificação sintática.
+**C) Ocorre um `ReferenceError`, pois `this` foi acessado antes da invocação do `super()`** — Em subclasses no JavaScript, o objeto `this` só é construído e disponibilizado após a execução do construtor da superclasse via `super()`. Escrever `this.autor = autor` antes de `super(nome, preco)` lança obrigatoriamente um `ReferenceError`. As alternativas A e D são incorretas porque violam essa regra fundamental da especificação ES6.
 
 </details>
 
 ---
 
-**Questão 5:** Considere esta classe:
+**Questão 2:** Analise o trecho de código abaixo que implementa classes e herança:
 
 ```js
-class Pessoa {
-    constructor(nome) {
-        this.nome = nome;
-    }
-    get saudacao() {
-        return `Olá, ${this.nome}!`;
+class Veiculo {
+    acelerar() {
+        return 'Acelerando motor comum...';
     }
 }
-const p = new Pessoa('Leo');
+
+class CarroEletrico extends Veiculo {
+    acelerar() {
+        const anterior = super.acelerar();
+        return `${anterior} em silêncio com propulsão elétrica!`;
+    }
+}
+
+const tesla = new CarroEletrico();
+console.log(tesla.acelerar());
 ```
 
-Qual é a forma **correta** de acessar a saudação?
+Qual será a saída exata no console?
 
-- A) `p.saudacao()`
-- B) `p.saudacao`
-- C) `Pessoa.saudacao`
-- D) `Pessoa.prototype.saudacao()`
+- A) `"Acelerando motor comum... em silêncio com propulsão elétrica!"`
+- B) `TypeError: super.acelerar is not a function`
+- C) `"em silêncio com propulsão elétrica!"`
+- D) `undefined`
 
 <details>
 <summary>🔍 Ver resposta</summary>
 
-**B) `p.saudacao`** — Um **getter** é acessado como se fosse uma propriedade, sem parênteses. Isso é exatamente o que você estudou na aula de Getters e Setters! A alternativa A parece correta mas `saudacao()` com parênteses tentaria chamar o *retorno* do getter como função, e como o retorno é uma string, daria `TypeError`. A alternativa C tentaria acessar um método estático, que não existe.
+**A) `"Acelerando motor comum... em silêncio com propulsão elétrica!"`** — A sintaxe `super.metodo()` permite que uma subclasse execute o método original definido no prototype da classe pai, possibilitando estender ou complementar o comportamento existente sem precisar reescrever toda a lógica. A alternativa C ignora a chamada a `super.acelerar()`, e a alternativa B supõe incorretamente que `super` não tem acesso a métodos normais.
+
+</details>
+
+---
+
+**Questão 3:** Uma empresa de logística possui uma estrutura onde `Caminhao` herda de `Automovel`, e `Automovel` herda de `Transporte`. Após instanciar `const c = new Caminhao()`, um desenvolvedor executa três verificações com o operador `instanceof`:
+
+```js
+console.log(c instanceof Caminhao);   // (1)
+console.log(c instanceof Automovel);  // (2)
+console.log(c instanceof Transporte); // (3)
+```
+
+Quais serão os resultados de (1), (2) e (3), respectivamente?
+
+- A) `true`, `false`, `false`
+- B) `true`, `true`, `false`
+- C) `true`, `true`, `true`
+- D) `true`, `undefined`, `undefined`
+
+<details>
+<summary>🔍 Ver resposta</summary>
+
+**C) `true`, `true`, `true`** — O operador `instanceof` percorre toda a cadeia de protótipos (`prototype chain`) do objeto até o topo (`Object.prototype`). Como `Caminhao` herda de `Automovel` e este herda de `Transporte`, o objeto `c` é simultaneamente uma instância de `Caminhao`, `Automovel`, `Transporte` e `Object`. A alternativa A é o erro de quem acredita que `instanceof` verifica apenas a classe imediata.
+
+</details>
+
+---
+
+**Questão 4:** Ao inspecionar o tipo de uma classe no console com `typeof`, qual é o retorno do JavaScript?
+
+```js
+class Notificacao {
+    enviar() {
+        console.log('Enviado!');
+    }
+}
+
+console.log(typeof Notificacao);
+```
+
+- A) `"class"`
+- B) `"function"`
+- C) `"object"`
+- D) `"constructor"`
+
+<details>
+<summary>🔍 Ver resposta</summary>
+
+**B) `"function"`** — Esta é uma clássica pegadinha de entrevistas e fundamentos de JavaScript: a palavra-chave `class` é apenas açúcar sintático (syntactic sugar) sobre funções construtoras e protótipos. Internamente, uma classe é registrada como uma função (`function`). Não existe o tipo primitivo `"class"` ou `"constructor"` no JavaScript.
+
+</details>
+
+---
+
+**Questão 5:** Um desenvolvedor criou uma subclasse sem declarar o bloco `constructor`:
+
+```js
+class Funcionario {
+    constructor(nome, salario) {
+        this.nome = nome;
+        this.salario = salario;
+    }
+}
+
+class Gerente extends Funcionario {
+    aumentarSalario(taxa) {
+        this.salario *= (1 + taxa);
+    }
+}
+
+const g = new Gerente('Ana', 8000);
+```
+
+O que acontece na instanciação de `new Gerente('Ana', 8000)`?
+
+- A) Ocorre erro de sintaxe, pois toda subclasse com `extends` é obrigada a escrever um `constructor` explícito.
+- B) O objeto é criado com propriedades `nome: undefined` e `salario: undefined`.
+- C) O JavaScript gera automaticamente um construtor padrão que chama `super(...args)`, inicializando `nome` e `salario` perfeitamente.
+- D) O objeto é criado vazio `{}` sem vínculo com `Funcionario`.
+
+<details>
+<summary>🔍 Ver resposta</summary>
+
+**C) O JavaScript gera automaticamente um construtor padrão que chama `super(...args)`, inicializando `nome` e `salario` perfeitamente** — Quando você não escreve um `constructor` em uma classe derivada (com `extends`), a engine do JavaScript insere por padrão a linha `constructor(...args) { super(...args); }`. Portanto, todos os argumentos passados ao `new Gerente` são repassados diretamente ao construtor de `Funcionario`.
 
 </details>
 
@@ -466,29 +713,30 @@ Qual é a forma **correta** de acessar a saudação?
 
 ## ⚡ Resumo Rápido para Revisão
 
-Memorize estas associações:
+Memorize estas associações práticas:
 
 | Se você precisar... | Pense em... |
 | :--- | :--- |
-| Agrupar construtor + métodos num único bloco | **`class NomeDaClasse { ... }`** |
-| Inicializar propriedades ao criar um objeto | **`constructor(params)`** |
-| Criar métodos que vão para o prototype | **Declarar diretamente dentro da classe** (sem `function`, sem vírgula) |
-| Acessar/validar propriedades como se fossem atributos | **`get` / `set`** dentro da classe |
-| Criar um método utilitário sem precisar de instância | **`static metodo()`** |
-| Herdar de outra classe | **`extends` + `super()`** (próxima aula!) |
-| Substituir toda a confusão de `call()` + `Object.create()` | **`class Filho extends Pai`** |
+| Criar uma classe organizada com construtor e métodos | **`class MinhaClasse { ... }`** |
+| Inicializar dados no momento do `new` | **`constructor(params) { ... }`** |
+| Fazer uma classe herdar propriedades e métodos de outra | **`class Subclasse extends Superclasse`** |
+| Executar o construtor da classe pai dentro da filha | **`super(argumentos)`** (na 1ª linha do construtor filho) |
+| Chamar um método da classe pai dentro de um método filho | **`super.nomeDoMetodo()`** |
+| Criar um método utilitário que não exige `new` | **`static meuMetodo()`** |
+| Criar propriedades computadas ou com validação | **`get propriedade()`** / **`set propriedade(valor)`** |
+| Verificar se um objeto pertence a uma classe ou ancestral | **`objeto instanceof Classe`** |
 
 ---
 
 ### 🔑 Fatos-Chave que Você PRECISA Saber
 
-| Fato / Valor | O que significa |
+| Fato / Valor | O que significa na prática |
 | :---: | :--- |
-| **`typeof MinhaClasse` → `"function"`** | Classes são Constructor Functions por baixo dos panos |
-| **Classes NÃO sofrem hoisting** | Declare a classe ANTES de usá-la (diferente de `function`) |
-| **Sem vírgulas entre métodos** | Diferente de objetos literais — separação por quebra de linha |
-| **`class` roda em strict mode** | Erros silenciosos viram erros explícitos automaticamente |
-| **`constructor` é opcional** | Se omitido, o JS cria um vazio: `constructor() {}` |
-| **Métodos da classe vão para `.prototype`** | `instancia.metodo()` funciona via prototype chain, igual antes |
-| **`static` fica na classe, não no prototype** | `MinhaClasse.metodo()` ✅ — `instancia.metodo()` ❌ |
-| **`get`/`set` dentro da classe** | Mesma coisa que `Object.defineProperty()`, mas mais legível |
+| **`super()` antes do `this`** | Chamar `this` antes de `super()` no construtor filho lança `ReferenceError` imediato. |
+| **`typeof Classe` → `"function"`** | Classes são Constructor Functions disfarçadas de sintaxe moderna. |
+| **Classes NÃO sofrem Hoisting** | Devem ser declaradas antes da linha onde são instanciadas com `new`. |
+| **`class` roda em Strict Mode** | Todo o código dentro do bloco `{}` de uma classe é avaliado em modo estrito automaticamente. |
+| **Sem vírgulas entre métodos** | Métodos em classes são separados por quebras de linha/chaves (vírgulas geram `SyntaxError`). |
+| **Construtor padrão em subclasses** | Omitir o `constructor` na subclasse faz o JS executar `super(...args)` automaticamente. |
+| **Métodos vão para o `.prototype`** | Todos os métodos declarados na classe ficam no protótipo compartilhado entre instâncias. |
+| **`instanceof` percorre a cadeia** | Uma subclasse é instância de si mesma, da classe pai e de `Object`. |
