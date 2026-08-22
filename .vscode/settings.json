@@ -1,0 +1,22 @@
+{
+  "workbench.colorCustomizations": {
+    // 🔹 Barra Lateral (Activity Bar) - Azul Céu Vivo
+    "activityBar.background": "#0284c7",
+    "activityBar.foreground": "#ffffff",
+    "activityBar.inactiveForeground": "#bae6fd",
+    "activityBarBadge.background": "#38bdf8",
+    "activityBarBadge.foreground": "#082f49",
+
+    // 🔹 Barra de Status (Inferior) - Azul Oceano
+    "statusBar.background": "#0369a1",
+    "statusBar.foreground": "#f0f9ff",
+    "statusBarItem.hoverBackground": "#0284c7",
+    "statusBarItem.remoteBackground": "#0284c7",
+    "statusBarItem.remoteForeground": "#ffffff",
+
+    // 🔹 Barra de Título (Superior) - Azul Profundo Harmônico
+    "titleBar.activeBackground": "#075985",
+    "titleBar.activeForeground": "#f0f9ff",
+    "titleBar.inactiveBackground": "#075985cc"
+  }
+}
