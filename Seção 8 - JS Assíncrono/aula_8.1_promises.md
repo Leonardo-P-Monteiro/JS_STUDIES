@@ -11,7 +11,7 @@
 3. [📖 Conceito 1: Fundamentos e Sintaxe Básica de Criação (`new Promise`)](#-conceito-1-fundamentos-e-sintaxe-básica-de-criação-new-promise)
 4. [📖 Conceito 2: Ciclo de Vida, Estados e Imutabilidade](#-conceito-2-ciclo-de-vida-estados-e-imutabilidade)
 5. [📖 Conceito 3: Consumo e Encadeamento Fluente (`.then()`, `.catch()`, `.finally()`)](#-conceito-3-consumo-e-encadeamento-fluente-then-catch-finally)
-6. [📖 Conceito 4: Combinadores Concorrentes (Métodos Estáticos de `Promise`)](#-conceito-4-combinadores-concorrentes-métodos-estáticos-de-promise)
+6. [📖 Conceito 4: Métodos Estáticos de `Promise` (Combinadores e Fábricas Imediatas)](#-conceito-4-métodos-estáticos-de-promise-combinadores-e-fábricas-imediatas)
 7. [📖 Conceito 5: Microtasks e a Prioridade no Event Loop](#-conceito-5-microtasks-e-a-prioridade-no-event-loop)
 8. [🔗 Mapa de Conexões](#-mapa-de-conexões)
 9. [📊 Resumo Visual](#-resumo-visual)
@@ -375,22 +375,45 @@ autenticarUsuario("leo@dev.com", "123")
 
 ---
 
-## 📖 Conceito 4: Combinadores Concorrentes (Métodos Estáticos de `Promise`)
+## 📖 Conceito 4: Métodos Estáticos de `Promise` (Combinadores e Fábricas Imediatas)
 
 ### 💡 O que é
 
-> 💬 **Analogias do Mundo Real:**
-> - **`Promise.all` (A Equipe de Escalada):** Quatro montanhistas amarrados pela mesma corda. Todos precisam chegar ao topo juntos para a expedição vencer. Se um único montanhista cair na fenda, a escalada é cancelada na hora (**Fail-Fast**).
-> - **`Promise.allSettled` (O Censo Demográfico):** O IBGE visita 100 casas. Ao final do dia, o coordenador quer ver o relatório de todas as 100 casas: quais responderam com sucesso e quais estavam vazias. Nenhuma falha cancela as outras.
-> - **`Promise.race` (A Corrida dos 100m Rasos):** Três velocistas disparam. O primeiro que cruzar a fita de chegada encerra a prova (seja ele o campeão ou alguém que tropeçou e caiu cruzando a linha).
-> - **`Promise.any` (A Busca por um Fósforo para a Fogueira):** Três amigos tentam acender uma fogueira, cada um com um graveto diferente. Basta o primeiro conseguir criar fogo para todos comemorarem. Falhas individuais são ignoradas a menos que todos falhem.
+A classe global `Promise` disponibiliza dois grupos fundamentais de **métodos estáticos nativos** que não exigem a instanciação manual com `new Promise`:
 
-Os métodos estáticos combinadores permitem orquestrar a execução de **múltiplas operações assíncronas concorrentes**, unificando múltiplos fluxos em uma única Promise consolidada.
+1. **Fábricas de Liquidação Imediata (`Promise.resolve` e `Promise.reject`):**
+   > 💬 **Analogia:** Um guichê de **atendimento expresso (Fast Pass)**. Se você já tem a documentação pronta em mãos (um dado em cache) ou se o cliente apresentou um documento falsificado na entrada (erro de validação imediato), o atendente não te manda para a fila de espera da cozinha: ele carimba a aprovação ou a recusa **imediatamente no balcão**.
+
+2. **Combinadores de Concorrência (`Promise.all`, `Promise.allSettled`, `Promise.race`, `Promise.any`):**
+   > 💬 **Analogias do Mundo Real:**
+   > - **`Promise.all` (A Equipe de Escalada):** Quatro montanhistas amarrados pela mesma corda. Todos precisam chegar ao topo juntos para a expedição vencer. Se um único montanhista cair na fenda, a escalada é cancelada na hora (**Fail-Fast**).
+   > - **`Promise.allSettled` (O Censo Demográfico):** O IBGE visita 100 casas. Ao final do dia, o coordenador quer ver o relatório de todas as 100 casas: quais responderam com sucesso e quais estavam vazias. Nenhuma falha cancela as outras.
+   > - **`Promise.race` (A Corrida dos 100m Rasos):** Três velocistas disparam. O primeiro que cruzar a fita de chegada encerra a prova (seja ele o campeão ou alguém que tropeçou e caiu cruzando a linha).
+   > - **`Promise.any` (A Busca por um Fósforo para a Fogueira):** Três amigos tentam acender uma fogueira, cada um com um graveto diferente. Basta o primeiro conseguir criar fogo para todos comemorarem. Falhas individuais são ignoradas a menos que todos falhem.
+
+---
 
 ### 📝 Sintaxe e Assinaturas dos Métodos Estáticos
 
 ```javascript
-// 1. Promise.all — Todos com sucesso OU primeiro erro (Fail-Fast)
+// ==========================================
+// GRUPO A: Fábricas de Liquidação Imediata
+// ==========================================
+
+// 1. Promise.resolve(valor) — Cria uma Promise IMEDIATAMENTE no estado fulfilled
+const promessaSucesso = Promise.resolve({ id: 1, nome: "Leonardo" });
+promessaSucesso.then((dados) => console.log("Dado imediato:", dados));
+
+// 2. Promise.reject(motivo) — Cria uma Promise IMEDIATAMENTE no estado rejected
+const promessaFalha = Promise.reject(new Error("Acesso negado: token expirado"));
+promessaFalha.catch((err) => console.error("Falha imediata:", err.message));
+
+
+// ==========================================
+// GRUPO B: Combinadores Concorrentes
+// ==========================================
+
+// 3. Promise.all — Todos com sucesso OU primeiro erro (Fail-Fast)
 Promise.all([promessa1, promessa2, promessa3])
   .then(([res1, res2, res3]) => {
     // Array com resultados na MESMA ordem do array de entrada
@@ -399,72 +422,115 @@ Promise.all([promessa1, promessa2, promessa3])
     // Disparado imediatamente no 1º erro que ocorrer
   });
 
-// 2. Promise.allSettled — Espera TODAS terminarem (Tolerância a Falhas)
+// 4. Promise.allSettled — Espera TODAS terminarem (Tolerância a Falhas)
 Promise.allSettled([promessa1, promessa2, promessa3])
   .then((resultados) => {
-    // resultados: Array<{ status: "fulfilled", value } | { status: "rejected", reason }>
+    // Array de objetos: [{ status: "fulfilled", value }, { status: "rejected", reason }]
   });
 
-// 3. Promise.race — Primeira a liquidar (seja Sucesso ou Erro)
+// 5. Promise.race — Primeira a liquidar (seja Sucesso ou Erro)
 Promise.race([promessa1, promessa2])
   .then((primeiroResultado) => { /* valor da mais rápida */ })
   .catch((primeiroErro) => { /* erro da mais rápida */ });
 
-// 4. Promise.any — Primeiro SUCESSO (ignora erros intermediários)
+// 6. Promise.any — Primeiro SUCESSO (ignora erros intermediários)
 Promise.any([promessa1, promessa2])
   .then((primeiroSucesso) => { /* primeiro valor resolvido com sucesso */ })
   .catch((aggregateError) => {
     console.error("Todas falharam:", aggregateError.errors);
   });
-
-// 5. Métodos Utilitários de Resolução Imediata
-const resolvida = Promise.resolve("Já pronto!"); // Cria Promise cumprida
-const rejeitada = Promise.reject(new Error("Erro!")); // Cria Promise rejeitada
 ```
+
+---
 
 ### ⚙️ Como funciona
 
-| Método Estático | Critério de Resolução | Critério de Rejeição | Comportamento de Erro | Caso de Uso Típico |
-|:---|:---|:---|:---:|:---|
-| **`Promise.all(iterable)`** | Quando **todas** cumprirem com sucesso. | Quando a **primeira** falhar. | **Fail-Fast**: Rejeita imediatamente no 1º erro. | Operações 100% interdependentes (ex: carregar Perfil + Saldo + Permissões). |
-| **`Promise.allSettled(iterable)`** | Quando **todas** finalizarem (`settled`). | **Nunca rejeita**. Retorna array de status. | Tolera falhas parciais. | Painéis/Dashboards onde um gráfico com erro não pode quebrar a tela inteira. |
-| **`Promise.race(iterable)`** | Quando a **primeira** concluir (com sucesso). | Quando a **primeira** concluir (com rejeição). | Segue o 1º desfecho a ocorrer. | Implementação de **Timeouts** de requisições de rede. |
-| **`Promise.any(iterable)`** | Quando a **primeira com sucesso** concluir. | Apenas se **todas** falharem. | Lança `AggregateError`. | Buscar recurso no servidor espelho/CDN mais rápido com redundância. |
+| Método Estático | Finalidade Principal | Critério de Resolução | Critério de Rejeição | Caso de Uso Típico |
+|:---|:---|:---|:---|:---|
+| **`Promise.resolve(valor)`** | Normalização / Sucesso Imediato | Estado `fulfilled` imediato com `valor`. *(Se `valor` for Promise, apenas repassa)* | N/A | Retornar valores de **Cache local** sem criar `new Promise`. |
+| **`Promise.reject(motivo)`** | Interrupção / Falha Imediata | N/A | Estado `rejected` imediato com `motivo`. | **Cláusulas de guarda síncronas** em pipelines assíncronos. |
+| **`Promise.all(iterable)`** | Concorrência de Tudo ou Nada | Quando **todas** cumprirem com sucesso. | Quando a **primeira** falhar (*Fail-Fast*). | Operações 100% interdependentes (Perfil + Saldo + Permissões). |
+| **`Promise.allSettled(iterable)`** | Relatório Completo de Lote | Quando **todas** finalizarem (`settled`). | **Nunca rejeita**. Retorna array de status. | Painéis/Dashboards onde 1 falha não pode quebrar a tela toda. |
+| **`Promise.race(iterable)`** | Competição por Velocidade | Quando a **primeira** concluir com sucesso. | Quando a **primeira** concluir com rejeição. | Implementação de **Timeouts** de requisições de rede. |
+| **`Promise.any(iterable)`** | Redundância / 1º Sucesso | Quando a **primeira com sucesso** concluir. | Apenas se **todas** falharem (`AggregateError`). | Consultar múltiplos servidores espelho/CDNs e pegar o 1º que responder. |
+
+---
 
 ### 📊 Diagrama
 
 ```mermaid
 flowchart TD
-    Q1{"❓ Precisa de TODAS as Promises?"}
-    Q1 -->|Sim| Q2{"❓ Falhas parciais são toleradas?"}
-    Q1 -->|Não| Q3{"❓ Quer a primeira que terminar?"}
+    Start{"Qual é a sua necessidade estática?"} --> Q_Tipo{"Precisa orquestrar MÚLTIPLAS ou criar UMA imediata?"}
     
-    Q2 -->|Não: Tudo ou nada| R1["🟢 Promise.all()"]
-    Q2 -->|Sim: Quero status de cada uma| R2["🔵 Promise.allSettled()"]
+    Q_Tipo -->|"Criar UMA imediata"| Q_Imed{"Qual é o desfecho inicial?"}
+    Q_Imed -->|"Já tenho o dado de Sucesso"| R_Resolve["⚡ Promise.resolve(valor)"]
+    Q_Imed -->|"Já detectei a Falha"| R_Reject["🚫 Promise.reject(motivo)"]
     
-    Q3 -->|Qualquer desfecho rápido| R3["🟠 Promise.race()"]
-    Q3 -->|Apenas o primeiro SUCESSO| R4["🟣 Promise.any()"]
+    Q_Tipo -->|"Orquestrar MÚLTIPLAS"| Q_All{"Precisa do resultado de TODAS?"}
+    Q_All -->|"Sim: Se 1 falhar cancela tudo"| R_All["🟢 Promise.all()"]
+    Q_All -->|"Sim: Quero relatório de cada uma"| R_Settled["🔵 Promise.allSettled()"]
+    
+    Q_All -->|"Não: Quero a mais rápida"| Q_Speed{"Quer apenas o 1º SUCESSO?"}
+    Q_Speed -->|"Sim: Ignora erros até haver 1 sucesso"| R_Any["🟣 Promise.any()"]
+    Q_Speed -->|"Não: Primeiro desfecho mesmo com erro"| R_Race["🟠 Promise.race()"]
 
-    style R1 fill:#2d6a4f,color:#fff
-    style R2 fill:#457b9d,color:#fff
-    style R3 fill:#e76f51,color:#fff
-    style R4 fill:#1d3557,color:#fff
-    style Q1 fill:#e9c46a,color:#000
-    style Q2 fill:#e9c46a,color:#000
-    style Q3 fill:#e9c46a,color:#000
+    style Start fill:#1d3557,color:#fff
+    style R_Resolve fill:#2d6a4f,color:#fff
+    style R_Reject fill:#e63946,color:#fff
+    style R_All fill:#2d6a4f,color:#fff
+    style R_Settled fill:#457b9d,color:#fff
+    style R_Any fill:#1d3557,color:#fff
+    style R_Race fill:#e76f51,color:#fff
 ```
+
+---
 
 ### 💻 Na Prática
 
-Implementando tolerância a falhas com `allSettled` e padrão de Timeout com `race`:
+#### Exemplo 1: Uso Profissional de `Promise.resolve` e `Promise.reject` (Cache com Validação)
+
+```javascript
+const cacheUsuarios = new Map([
+  [1, { id: 1, nome: "Leonardo", perfil: "Admin" }]
+]);
+
+function obterUsuario(id) {
+  // 1. Cláusula de guarda com Promise.reject (Falha imediata sem I/O)
+  if (!id || id <= 0) {
+    return Promise.reject(new TypeError("ID de usuário inválido."));
+  }
+
+  // 2. Retorno imediato do Cache com Promise.resolve (Sucesso imediato sem I/O)
+  if (cacheUsuarios.has(id)) {
+    console.log("⚡ Recuperado do Cache em memória!");
+    return Promise.resolve(cacheUsuarios.get(id));
+  }
+
+  // 3. Caso não esteja no cache, busca na rede com new Promise
+  console.log("🌐 Buscando no servidor remoto...");
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const novoUsuario = { id, nome: "Novo Usuário", perfil: "User" };
+      cacheUsuarios.set(id, novoUsuario);
+      resolve(novoUsuario);
+    }, 1000);
+  });
+}
+
+// Consumo idêntico e consistente para qualquer um dos 3 caminhos:
+obterUsuario(1)
+  .then(u => console.log("Usuário carregado:", u))
+  .catch(err => console.error("Erro:", err.message));
+```
+
+#### Exemplo 2: Uso de `Promise.allSettled` e `Promise.race` (Dashboard e Timeout)
 
 ```javascript
 const servicoUsuario = () => new Promise(res => setTimeout(() => res({ nome: "Ana" }), 300));
 const servicoNoticias = () => new Promise((_, rej) => setTimeout(() => rej(new Error("API de Notícias offline")), 200));
 const servicoClima = () => new Promise(res => setTimeout(() => res({ temp: "24°C" }), 400));
 
-// 1. Dashboard tolerante a falhas parciais com Promise.allSettled
-console.log("Carregando Dashboard...");
+// Dashboard tolerante a falhas parciais com Promise.allSettled
 Promise.allSettled([servicoUsuario(), servicoNoticias(), servicoClima()])
   .then((resultados) => {
     resultados.forEach((res, index) => {
@@ -476,7 +542,7 @@ Promise.allSettled([servicoUsuario(), servicoNoticias(), servicoClima()])
     });
   });
 
-// 2. Utilitário de Timeout com Promise.race
+// Utilitário de Timeout com Promise.race
 function requisicaoComTimeout(promessaOriginal, limiteMs) {
   const timeout = new Promise((_, reject) => {
     setTimeout(() => reject(new Error(`Timeout: Limite de ${limiteMs}ms excedido!`)), limiteMs);
@@ -484,14 +550,28 @@ function requisicaoComTimeout(promessaOriginal, limiteMs) {
   return Promise.race([promessaOriginal, timeout]);
 }
 
-// Teste de timeout: servicoClima leva 400ms, limite de 250ms
 requisicaoComTimeout(servicoClima(), 250)
   .then(dados => console.log("Resposta rápida:", dados))
   .catch(err => console.error("⏱️ Falha de Timeout:", err.message));
 ```
 
+---
+
 ### ⚠️ Armadilhas Comuns
 
+- ❌ **Anti-Pattern de Criar `new Promise` para Retornar Valor Pronto:**
+  ```javascript
+  // ANTI-PATTERN: Verborrágico e desnecessário
+  function pegarConfig() {
+    return new Promise((resolve) => resolve({ tema: "dark" }));
+  }
+
+  // FORMA ELEGANTE E DIRETA:
+  function pegarConfig() {
+    return Promise.resolve({ tema: "dark" });
+  }
+  ```
+- ❌ **Esquecer de Tratar Rejeições de `Promise.reject()`:** Uma Promise criada com `Promise.reject(erro)` já nasce no estado `rejected`. Se nenhum `.catch()` for anexado a ela antes do próximo tick do Event Loop, um alerta de `UnhandledPromiseRejection` será emitido no ambiente.
 - ❌ **Usar `Promise.all` em telas de Dashboard independentes:** Se uma requisição de tempo secundária falhar, o `Promise.all` descarta silenciosamente o perfil do usuário e o extrato financeiro. Use `Promise.allSettled`.
 - ❌ **Achar que `Promise.race` aborta a requisição perdedora:** A Promise perdedora continua executando em segundo plano no servidor; apenas a entrega do valor para o seu código é ignorada.
 
@@ -634,21 +714,21 @@ As Promises representam o **pilar mestre** do JavaScript moderno: dominar sua cr
 ```mermaid
 flowchart TD
     subgraph CRIACAO["1. Criação"]
-        A["new Promise((resolve, reject) => {...})"]
+        A["new Promise( executor )"]
     end
 
     subgraph ESTADOS["2. Estados Imutáveis"]
         B["Pending (Pendente)"]
         C["Fulfilled (Sucesso)"]
         D["Rejected (Falha)"]
-        B -->|resolve(v)| C
-        B -->|reject(e)| D
+        B -->|"resolve(valor)"| C
+        B -->|"reject(erro)"| D
     end
 
     subgraph CONSUMO["3. Encadeamento Linear"]
-        C --> E[".then(dado => novoDado)"]
-        D --> F[".catch(erro => recupera)"]
-        E --> G[".finally(() => limpeza)"]
+        C --> E[".then( onFulfilled )"]
+        D --> F[".catch( onRejected )"]
+        E --> G[".finally( onFinally )"]
         F --> G
     end
 
