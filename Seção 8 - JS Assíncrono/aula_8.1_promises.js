@@ -4,10 +4,10 @@ const minhaPromise = new Promise((resolve, reject) => {
     
     let aprovado = true;
 
-    // const resultadoSorteio = Math.random()
-    // if (resultadoSorteio <= 0.4) {
-    //     aprovado = false;
-    // };
+    const resultadoSorteio = Math.random()
+    if (resultadoSorteio <= 0.4) {
+        aprovado = false;
+    };
 
     if (aprovado) {
         // Se a operação concluir corretamente, chamamos o resolve.
@@ -19,16 +19,16 @@ const minhaPromise = new Promise((resolve, reject) => {
     };
 });
 
-// minhaPromise
-//     .then((resultado_positivo) => {
-//         console.log(resultado_positivo)
-//     })
-//     .catch((resultado_negativo) => {
-//         console.log(resultado_negativo)
-//     })
-//     .finally(() => {
-//         console.warn('Finalizado.')
-//     });
+minhaPromise
+    .then((resultado_positivo) => {
+        console.log(resultado_positivo)
+    })
+    .catch((resultado_negativo) => {
+        console.log(resultado_negativo)
+    })
+    .finally(() => {
+        console.warn('Finalizado.')
+    });
 
 
 // ⚠️ Promise dentro de função. Ou seja, que recebem argumentos.
@@ -44,16 +44,16 @@ function minhaFuncaoPromise (nome, idade) {
     });
 };
 
-// minhaFuncaoPromise('Leonardo', 18)
-//     .then((result) => {
-//         console.log(result)
-//     })
-//     .catch((err) => {
-//         console.warn(err)
-//     })
-//     .finally(() => {
-//         console.log('Finalizada função com promise.')
-//     });
+minhaFuncaoPromise('Leonardo', 18)
+    .then((result) => {
+        console.log(result)
+    })
+    .catch((err) => {
+        console.warn(err)
+    })
+    .finally(() => {
+        console.log('Finalizada função com promise.')
+    });
 
 // ⚠️ Métodos de Promises
 
